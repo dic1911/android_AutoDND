@@ -1,0 +1,10 @@
+How to use:
+1. Open this app and tap on the floating button to grant notification policy access
+2. Return to this app and tap on the floating button again to enable accessibility service
+3. Enjoy!
+
+How it works:
+
+This app uses accessibility service to monitor the app that you're currently using, the mechanism is not perfect as Android feeds weird event to the accessibility service in some circumstances.
+
+Note. There's no network related code in this app, in other words, your privacy don't get violated with this app.
