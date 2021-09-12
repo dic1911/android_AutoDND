@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="30dp"
+        android:background="@android:color/white"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_margin="12.0dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/app_ic"
+                android:layout_width="92.0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="24dp"
+                android:contentDescription="IMG" />
+
+            <TextView
+                android:id="@+id/app_hname"
+                android:layout_width="96dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:text="Application Name"
+                android:textAlignment="4" />
+
+            <TextView
+                android:id="@+id/app_pkgname"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:text="com.example.app"
+                android:textAlignment="1" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

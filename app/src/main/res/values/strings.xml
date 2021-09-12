@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">AutoDND</string>
+    <string name="tab_1_text">Added Apps</string>
+    <string name="tab_1_tip">This tab displays apps added for auto DND toggle</string>
+    <string name="tab_2_text">All Apps</string>
+    <string name="tab_2_tip">Tap listed app to enable auto DND toggle for it</string>
+    <string name="setup_tip">Please tap the floating button to finish setup.</string>
+    <string name="added">Added</string>
+    <string name="removed">Removed</string>
+    <string name="accessibility_service_label">Auto DND Toggle</string>
+    <string name="accessibility_service_desc">Turn on Do Not Disturb automatically whenever using specified apps and turn it off afterwards.</string>
+    <string name="notification_policy_tip">Please allow this app to access/modify notification policy.</string>
+    <string name="accessbility_svc_tip">Please enable accessibility service to make this app work.</string>
+</resources>
