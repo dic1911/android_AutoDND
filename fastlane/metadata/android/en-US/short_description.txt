@@ -1,1 +1,1 @@
-A simple tool to turn on/off DND(Do Not Disturb) automatically when using specified apps.
+A simple tool to toggle DND automatically when using specified apps.
