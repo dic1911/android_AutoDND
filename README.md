@@ -1,7 +1,10 @@
 # AutoDND
 
+[<img src="https://f-droid.org/badge/get-it-on-en.png" alt="Get it from F-Droid"
+      height="100"><br/>](https://f-droid.org/packages/moe.dic1911.autodnd)
 
 Just a simple tool to turn on/off DND(Do Not Disturb) automatically when using specified apps.
+
 
 ---
 
