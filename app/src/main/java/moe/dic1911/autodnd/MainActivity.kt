@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
                         Storage.appendToList(0, e)
                     //Log.d("030_pkg", "${e.app_hname}, ${e.app_pkgname}, $p")
                 }
+                Storage.sortList(false)
             }
         }
         Log.d("030_pkg", "applist.size=${Storage.getAppList(0)?.size}")

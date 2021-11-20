@@ -65,6 +65,13 @@ object Storage {
             }
         }
     }
+
+    fun sortList(dndOnly: Boolean) {
+        if (!dndOnly)
+            appListStorage.applist.sortWith(compareBy{ it.app_hname })
+        appListStorage.applist_dnd.sortWith(compareBy{ it.app_hname })
+    }
+
     private fun appendToPrefs(s: String) {
         val orig = prefs.getString("dnd_enabled_apps", "")
         prefs.edit().putString("dnd_enabled_apps", "$orig,$s").apply()
@@ -104,6 +111,7 @@ object Storage {
         e.ic_app = pm.getApplicationIcon(ai)
         appendToList(0, e)
         appendToPrefs(pkg)
+        sortList(true)
         return true
     }
 
