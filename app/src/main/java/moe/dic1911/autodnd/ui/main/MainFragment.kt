@@ -8,21 +8,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import moe.dic1911.autodnd.R
-import moe.dic1911.autodnd.data.AppEntry
 import moe.dic1911.autodnd.data.Storage
 import moe.dic1911.autodnd.databinding.FragmentMainBinding
 import moe.dic1911.autodnd.databinding.FragmentMainBinding.inflate
-import java.lang.StringBuilder
 
-/**
- * A placeholder fragment containing a simple view.
- */
-class MainFragment : Fragment() {
+class MainFragment(val index: Int) : Fragment() {
 
     private lateinit var pageViewModel: PageViewModel
 
@@ -33,7 +27,7 @@ class MainFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         pageViewModel = ViewModelProviders.of(this).get(PageViewModel::class.java).apply {
-            setIndex(arguments?.getInt(ARG_SECTION_NUMBER) ?: 1)
+            setIndex(index)
             setAdapter(AppListAdapter())
             passContext(requireActivity().applicationContext)
         }
@@ -116,7 +110,7 @@ class MainFragment : Fragment() {
          */
         @JvmStatic
         fun newInstance(sectionNumber: Int, mContext: Context): MainFragment {
-            return MainFragment().apply {
+            return MainFragment(sectionNumber).apply {
                 arguments = Bundle().apply {
                     putInt(ARG_SECTION_NUMBER, sectionNumber)
                 }

@@ -11,9 +11,10 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import moe.dic1911.autodnd.data.AppEntry
 import moe.dic1911.autodnd.data.Storage
 import moe.dic1911.autodnd.ui.main.SectionsPagerAdapter
@@ -24,6 +25,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fab: FloatingActionButton
 
     private val TAG = "030"
+
+    private val TAB_TITLES = arrayOf(
+        R.string.tab_1_text,
+        R.string.tab_2_text
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,11 +58,14 @@ class MainActivity : AppCompatActivity() {
         Log.d("030_pkg", "applist.size=${Storage.getAppList(0)?.size}")
         Log.d("030_pkg", "applist_dnd.size=${Storage.getAppList(1)?.size}")
 
-        val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
-        val viewPager: ViewPager = findViewById(R.id.view_pager)
+        val sectionsPagerAdapter = SectionsPagerAdapter(this)
+        val viewPager: ViewPager2 = findViewById(R.id.view_pager)
         viewPager.adapter = sectionsPagerAdapter
         val tabs: TabLayout = findViewById(R.id.tabs)
-        tabs.setupWithViewPager(viewPager)
+        TabLayoutMediator(tabs, viewPager) { tab, position ->
+            tab.text = getString(TAB_TITLES[position])
+        }.attach()
+
 
         fab = findViewById(R.id.fab)
         fab.setOnClickListener(fun(it: View) {
