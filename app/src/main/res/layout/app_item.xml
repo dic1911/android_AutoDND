@@ -26,7 +26,7 @@
                 android:layout_width="92.0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="24dp"
-                android:contentDescription="IMG" />
+                android:contentDescription="@string/desc_img" />
 
             <TextView
                 android:id="@+id/app_hname"
@@ -34,7 +34,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:gravity="center"
-                android:text="Application Name"
+                android:text="@string/ex_app_name"
                 android:textAlignment="4" />
 
             <TextView
@@ -43,7 +43,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:gravity="center"
-                android:text="com.example.app"
+                android:text="@string/ex_pkg_name"
                 android:textAlignment="1" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

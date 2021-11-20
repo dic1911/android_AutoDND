@@ -1,6 +1,5 @@
 package moe.dic1911.autodnd.data
 
-import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 
 class AppEntry {

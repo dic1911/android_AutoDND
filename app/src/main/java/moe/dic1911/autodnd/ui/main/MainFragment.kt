@@ -25,13 +25,9 @@ import java.lang.StringBuilder
 class MainFragment : Fragment() {
 
     private lateinit var pageViewModel: PageViewModel
-    private lateinit var pkgList: ArrayList<AppEntry>
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
-
-    fun reload() {
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,11 +51,11 @@ class MainFragment : Fragment() {
         Log.d("030_lst", "${pageViewModel.getIndex()}, size = ${Storage.getAppList(pageViewModel.getIndex()!!)!!.size}")
         adapter.appList = Storage.getAppList(pageViewModel.getIndex()!!)!!
         recyclerView.adapter = adapter
-        pageViewModel.text.observe(viewLifecycleOwner, Observer<String> {
+        pageViewModel.text.observe(viewLifecycleOwner, {
             Log.d("030.txt", it.toString())
             textView.text = it
         })
-        pageViewModel.applist.observe(viewLifecycleOwner, Observer<ArrayList<AppEntry>> {
+        pageViewModel.applist.observe(viewLifecycleOwner, {
             Log.d("030-list", it.size.toString())
             (recyclerView.adapter as AppListAdapter?)?.appList = it
             (recyclerView.adapter as AppListAdapter?)?.notifyDataSetChanged()
@@ -67,7 +63,7 @@ class MainFragment : Fragment() {
         if (Storage.prefs_str.hasObservers()) {
             Storage.prefs_str.removeObservers(this)
         }
-        Storage.prefs_str.observe(viewLifecycleOwner, Observer<ArrayList<String>> {
+        Storage.prefs_str.observe(viewLifecycleOwner, {
             if (pageViewModel.getIndex() == 0) {
                 Log.d("030-list", it.size.toString())
                 (recyclerView.adapter as AppListAdapter?)?.appList = Storage.getAppList(0)!!
@@ -79,10 +75,6 @@ class MainFragment : Fragment() {
 
         // val view = binding.root
         return root
-    }
-
-    fun updateList() {
-        pageViewModel.updateAdapter(Storage.getAppList(pageViewModel.getIndex()!!)!!)
     }
 
     override fun onResume() {

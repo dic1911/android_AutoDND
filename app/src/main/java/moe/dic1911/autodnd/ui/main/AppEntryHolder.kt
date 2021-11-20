@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import androidx.recyclerview.widget.RecyclerView
 import moe.dic1911.autodnd.R
@@ -13,7 +12,6 @@ import moe.dic1911.autodnd.data.AppEntry
 import moe.dic1911.autodnd.data.Storage
 
 class AppEntryHolder (itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-    private val card: View = itemView.findViewById(R.id.card)
     private val ic_app: ImageView = itemView.findViewById(R.id.app_ic)
     private val txt_appname: TextView = itemView.findViewById(R.id.app_hname)
     private val txt_pkgname: TextView = itemView.findViewById(R.id.app_pkgname)

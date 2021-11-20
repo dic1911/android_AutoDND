@@ -25,7 +25,7 @@ class PageViewModel : ViewModel() {
         mContext.getString(TOP_TEXT[it])
     }
 
-    val applist: LiveData<ArrayList<AppEntry>> = MutableLiveData<ArrayList<AppEntry>>()
+    val applist: LiveData<ArrayList<AppEntry>> = MutableLiveData()
 
     fun passContext(c: Context) {
         mContext = c
@@ -38,10 +38,6 @@ class PageViewModel : ViewModel() {
 
     fun setAdapter(a: AppListAdapter) {
         _adapter.value = a
-    }
-
-    fun getAdapter(): AppListAdapter? {
-        return _adapter.value
     }
 
     fun setIndex(index: Int) {

@@ -11,4 +11,8 @@
     <string name="accessibility_service_desc">Turn on Do Not Disturb automatically whenever using specified apps and turn it off afterwards.</string>
     <string name="notification_policy_tip">Please allow this app to access/modify notification policy.</string>
     <string name="accessbility_svc_tip">Please enable accessibility service to make this app work.</string>
+    <string name="desc_fab">Button for acquiring permission</string>
+    <string name="desc_img">IMG</string>
+    <string name="ex_app_name">Application Name</string>
+    <string name="ex_pkg_name">com.example.app</string>
 </resources>
