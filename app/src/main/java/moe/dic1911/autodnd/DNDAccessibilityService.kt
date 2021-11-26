@@ -2,6 +2,7 @@ package moe.dic1911.autodnd
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.app.Application
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
 import android.util.Log
+import android.util.TimeUtils
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityEvent.*
 import moe.dic1911.autodnd.data.Storage
@@ -22,6 +24,7 @@ class DNDAccessibilityService : AccessibilityService() {
     private var state = 0
     private var bakNotiState = NotificationManager.INTERRUPTION_FILTER_ALL
     private var bakRingMode = AudioManager.RINGER_MODE_VIBRATE
+    private var launcherTimestamp: Long = 0
 
     override fun onInterrupt() {}
 
@@ -75,6 +78,12 @@ class DNDAccessibilityService : AccessibilityService() {
                         notiMan.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALARMS)
                     state = 1
                 } else if (state == 1) {
+                    // workaround against invalid(?) events triggered by gesture
+                    if (false && curApp.contains("launcher")) {
+                        val popup = Intent(this, PopupActivity()::class.java)
+                        popup.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(popup)
+                    }
                     state = 0
                     if (bakNotiState != notiMan.currentInterruptionFilter) {
                         notiMan.setInterruptionFilter(bakNotiState)
@@ -84,5 +93,4 @@ class DNDAccessibilityService : AccessibilityService() {
             }
         }
     }
-
 }
