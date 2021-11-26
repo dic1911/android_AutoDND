@@ -31,11 +31,6 @@ class PageViewModel : ViewModel() {
         mContext = c
     }
 
-    fun updateAdapter(a: ArrayList<AppEntry>) {
-        _adapter.value?.appList = a
-        _adapter.value?.notifyDataSetChanged()
-    }
-
     fun setAdapter(a: AppListAdapter) {
         _adapter.value = a
     }
