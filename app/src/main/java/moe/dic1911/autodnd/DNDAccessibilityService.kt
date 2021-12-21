@@ -62,8 +62,6 @@ class DNDAccessibilityService : AccessibilityService() {
         val notiMan = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (event != null) {
-            Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, current app = ${event.packageName?.toString()}")
-
             val newCurApp = event.packageName?.toString() ?: return // TODO: NPE?
             if (newCurApp != curApp && !blacklist.contains(newCurApp)) {
                 curApp = newCurApp
