@@ -52,7 +52,7 @@ class MainFragment(val index: Int) : Fragment() {
         pageViewModel.applist.observe(viewLifecycleOwner, {
             Log.d("030-list", it.size.toString())
             (recyclerView.adapter as AppListAdapter?)?.appList = it
-            (recyclerView.adapter as AppListAdapter?)?.notifyItemRangeChanged(0, it.size)
+            (recyclerView.adapter as AppListAdapter?)?.notifyDataSetChanged()
         })
         if (Storage.prefs_str.hasObservers()) {
             Storage.prefs_str.removeObservers(this)
