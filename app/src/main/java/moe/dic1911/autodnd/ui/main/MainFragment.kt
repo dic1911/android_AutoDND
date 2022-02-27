@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -45,29 +46,40 @@ class MainFragment(val index: Int) : Fragment() {
         Log.d("030_lst", "${pageViewModel.getIndex()}, size = ${Storage.getAppList(pageViewModel.getIndex()!!)!!.size}")
         adapter.appList = Storage.getAppList(pageViewModel.getIndex()!!)!!
         recyclerView.adapter = adapter
-        pageViewModel.text.observe(viewLifecycleOwner, {
+        pageViewModel.text.observe(viewLifecycleOwner) {
             Log.d("030.txt", it.toString())
             textView.text = it
-        })
-        pageViewModel.applist.observe(viewLifecycleOwner, {
+        }
+
+        Storage.initialized.observe(viewLifecycleOwner) {
+            root.findViewById<ProgressBar>(R.id.progress).visibility = when (it) {
+                true -> View.GONE
+                else -> View.VISIBLE
+            }
+            recyclerView.visibility = when (it) {
+                true -> View.VISIBLE
+                else -> View.GONE
+            }
+        }
+
+        pageViewModel.applist.observe(viewLifecycleOwner) {
             Log.d("030-list", it.size.toString())
             (recyclerView.adapter as AppListAdapter?)?.appList = it
             (recyclerView.adapter as AppListAdapter?)?.notifyDataSetChanged()
-        })
+        }
         if (Storage.prefs_str.hasObservers()) {
             Storage.prefs_str.removeObservers(this)
         }
-        Storage.prefs_str.observe(viewLifecycleOwner, {
+        Storage.prefs_str.observe(viewLifecycleOwner) {
             if (pageViewModel.getIndex() == 0) {
                 Log.d("030-list", it.size.toString())
                 (recyclerView.adapter as AppListAdapter?)?.appList = Storage.getAppList(0)!!
                 (recyclerView.adapter as AppListAdapter?)?.notifyDataSetChanged()
             }
-        })
+        }
 
         _binding = inflate(inflater, container, false)
 
-        // val view = binding.root
         return root
     }
 

@@ -3,6 +3,7 @@ package moe.dic1911.autodnd.data
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -10,7 +11,7 @@ import androidx.lifecycle.MutableLiveData
 object Storage {
 
     private val appListStorage = AppListStorage()
-    private var initialized = false
+    var initialized: MutableLiveData<Boolean> = MutableLiveData(false)
     var setupStatus = 0
     private lateinit var pm: PackageManager
     private lateinit var prefs: SharedPreferences
@@ -25,6 +26,7 @@ object Storage {
     }
 
     fun initDNDList(context: Context) {
+        initialized.postValue(false)
         pm = context.packageManager
         prefs = context.getSharedPreferences("main", MODE_PRIVATE)
         prefs_str = MutableLiveData()
@@ -48,7 +50,32 @@ object Storage {
             Log.d("030_prefs_load", tmp)
         }
         prefs_str.value = prefs_str_tmp
-        initialized = true
+
+        if (getAppList(1)!!.size != 0)
+            clearList()
+
+        val pkgs = pm.getInstalledPackages(0)
+        Log.d("030_pkg", "pkgs.size=${pkgs.size}")
+        for (i in pkgs.indices) {
+            val p = pkgs[i]
+            val e = AppEntry()
+            if (p!!.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
+                e.app_hname = p.applicationInfo.loadLabel(pm).toString()
+                e.app_pkgname = p.packageName
+                e.ic_app = p.applicationInfo.loadIcon(pm)
+                appendToList(1, e)
+                if (prefs_str.value!!.contains(p.packageName))
+                    appendToList(0, e)
+            }
+            sortList(false)
+        }
+
+        initialized.postValue(true)
+    }
+
+    fun clearList() {
+        appListStorage.applist.clear()
+        appListStorage.applist_dnd.clear()
     }
 
     fun appendToList(mode: Int, e: AppEntry) {

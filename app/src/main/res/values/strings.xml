@@ -15,4 +15,5 @@
     <string name="desc_img">IMG</string>
     <string name="ex_app_name">Application Name</string>
     <string name="ex_pkg_name">com.example.app</string>
+    <string name="refreshing">Refreshing…</string>
 </resources>

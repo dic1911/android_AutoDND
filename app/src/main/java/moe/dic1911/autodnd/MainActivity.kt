@@ -5,18 +5,22 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.res.ColorStateList
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import moe.dic1911.autodnd.data.AppEntry
 import moe.dic1911.autodnd.data.Storage
+import moe.dic1911.autodnd.ui.main.MainFragment
 import moe.dic1911.autodnd.ui.main.SectionsPagerAdapter
 
 
@@ -37,25 +41,6 @@ class MainActivity : AppCompatActivity() {
 
         Storage.initDNDList(this)
 
-        val pm = packageManager
-        if (pm != null && Storage.getAppList(1)!!.size == 0) {
-            val pkgs = pm.getInstalledPackages(0)
-            Log.d("030_pkg", "pkgs.size=${pkgs.size}")
-            for (i in pkgs.indices) {
-                val p = pkgs[i]
-                val e = AppEntry()
-                if (p!!.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
-                    e.app_hname = p.applicationInfo.loadLabel(pm).toString()
-                    e.app_pkgname = p.packageName
-                    e.ic_app = p.applicationInfo.loadIcon(pm)
-                    Storage.appendToList(1, e)
-                    if (Storage.prefs_str.value!!.contains(p.packageName))
-                        Storage.appendToList(0, e)
-                    //Log.d("030_pkg", "${e.app_hname}, ${e.app_pkgname}, $p")
-                }
-                Storage.sortList(false)
-            }
-        }
         Log.d("030_pkg", "applist.size=${Storage.getAppList(0)?.size}")
         Log.d("030_pkg", "applist_dnd.size=${Storage.getAppList(1)?.size}")
 
@@ -69,25 +54,6 @@ class MainActivity : AppCompatActivity() {
 
 
         fab = findViewById(R.id.fab)
-        fab.setOnClickListener(fun(it: View) {
-            when (Storage.setupStatus) {
-                0 -> {
-                    fab.visibility = View.GONE
-                }
-                1,3 -> {
-                    Toast.makeText(applicationContext, R.string.notification_policy_tip, Toast.LENGTH_LONG).show()
-                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
-                }
-                2 -> {
-                    Toast.makeText(applicationContext, R.string.accessbility_svc_tip, Toast.LENGTH_LONG).show()
-                    val settingsIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                    if (settingsIntent !is Activity) {
-                        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    startActivity(settingsIntent)
-                }
-            }
-        })
         notiMan = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
@@ -117,9 +83,34 @@ class MainActivity : AppCompatActivity() {
 
         Storage.setupStatus = Storage.setupStatus
 
-        fab.visibility = when (Storage.setupStatus) {
-            0 -> View.GONE
-            else -> View.VISIBLE
+        if (Storage.setupStatus == 0) {
+            fab.backgroundTintList = ColorStateList.valueOf(getColor(R.color.colorAccent))
+            fab.setImageIcon(Icon.createWithResource(baseContext, R.drawable.ic_baseline_refresh_32))
+        } else {
+            fab.backgroundTintList = ColorStateList.valueOf(getColor(R.color.design_default_color_error))
+            fab.setImageIcon(Icon.createWithResource(baseContext, android.R.drawable.stat_sys_warning))
         }
+
+        fab.setOnClickListener(fun(it: View) {
+            when (Storage.setupStatus) {
+                0 -> {
+                    Toast.makeText(this, R.string.refreshing, Toast.LENGTH_LONG).show()
+                    Storage.initialized.postValue(false)
+                    Storage.initDNDList(this)
+                }
+                1,3 -> {
+                    Toast.makeText(applicationContext, R.string.notification_policy_tip, Toast.LENGTH_LONG).show()
+                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+                }
+                2 -> {
+                    Toast.makeText(applicationContext, R.string.accessbility_svc_tip, Toast.LENGTH_LONG).show()
+                    val settingsIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    if (settingsIntent !is Activity) {
+                        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(settingsIntent)
+                }
+            }
+        })
     }
 }

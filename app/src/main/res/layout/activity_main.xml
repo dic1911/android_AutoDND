@@ -40,8 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:visibility="gone"
-        android:backgroundTint="@color/design_default_color_error"
         android:contentDescription="@string/desc_fab"
+        app:backgroundTint="@color/design_default_color_error"
         app:srcCompat="@android:drawable/stat_sys_warning" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
