@@ -66,6 +66,13 @@ object Storage {
                 appendToList(1, e)
                 if (prefs_str.value!!.contains(p.packageName))
                     appendToList(0, e)
+            } else {
+                e.app_hname = p.applicationInfo.loadLabel(pm).toString()
+                e.app_pkgname = p.packageName
+                e.ic_app = p.applicationInfo.loadIcon(pm)
+                appendToList(2, e)
+                if (prefs_str.value!!.contains(p.packageName))
+                    appendToList(0, e)
             }
             sortList(false)
         }
@@ -90,6 +97,9 @@ object Storage {
             1 -> {
                 appListStorage.applist.add(e)
             }
+            2 -> {
+                appListStorage.applist_sys.add(e)
+            }
         }
     }
 
@@ -108,6 +118,7 @@ object Storage {
         when (mode) {
             0 -> return appListStorage.applist_dnd
             1 -> return appListStorage.applist
+            2 -> return appListStorage.applist_sys
         }
         return null
     }

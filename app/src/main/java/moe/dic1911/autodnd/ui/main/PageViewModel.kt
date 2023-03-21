@@ -14,6 +14,7 @@ class PageViewModel : ViewModel() {
 
     private val TOP_TEXT = arrayOf(
         R.string.tab_1_tip,
+        R.string.tab_2_tip,
         R.string.tab_2_tip
     )
 

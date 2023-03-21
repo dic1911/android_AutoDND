@@ -4,6 +4,7 @@
     <string name="tab_1_tip">This tab displays apps added for auto DND toggle</string>
     <string name="tab_2_text">All Apps</string>
     <string name="tab_2_tip">Tap listed app to enable auto DND toggle for it</string>
+    <string name="tab_3_text">System Apps</string>
     <string name="setup_tip">Please tap the floating button to finish setup.</string>
     <string name="added">Added</string>
     <string name="removed">Removed</string>

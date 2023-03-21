@@ -32,7 +32,8 @@ class MainActivity : AppCompatActivity() {
 
     private val TAB_TITLES = arrayOf(
         R.string.tab_1_text,
-        R.string.tab_2_text
+        R.string.tab_2_text,
+        R.string.tab_3_text
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
