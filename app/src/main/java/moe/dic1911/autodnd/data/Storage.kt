@@ -13,6 +13,7 @@ object Storage {
     private val appListStorage = AppListStorage()
     var initialized: MutableLiveData<Boolean> = MutableLiveData(false)
     var setupStatus = 0
+    var shizukuMode = false
     private lateinit var pm: PackageManager
     private lateinit var prefs: SharedPreferences
     lateinit var prefs_str: MutableLiveData<ArrayList<String>>
@@ -23,6 +24,8 @@ object Storage {
         val tmp = prefs.getString("dnd_enabled_apps", "")
         prefs_str = MutableLiveData()
         prefs_str.value = ArrayList(tmp!!.split(","))
+        shizukuMode = prefs.getBoolean("shizuku", false)
+        Log.d("030_dnd_shizuku", shizukuMode.toString())
     }
 
     fun initDNDList(context: Context) {
@@ -78,6 +81,11 @@ object Storage {
         }
 
         initialized.postValue(true)
+    }
+
+    fun setShizuku(v: Boolean) {
+        prefs.edit().putBoolean("shizuku", v).apply()
+        shizukuMode = v
     }
 
     fun clearList() {
@@ -151,6 +159,12 @@ object Storage {
         appendToPrefs(pkg)
         sortList(true)
         return true
+    }
+
+    fun onShizukuRequestPermissionsResult(requestCode: Int, grantResult: Int) {
+        val granted = grantResult == PackageManager.PERMISSION_GRANTED
+        // Do stuff based on the result and the request code
+        setShizuku(granted)
     }
 
 }

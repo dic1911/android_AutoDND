@@ -14,6 +14,9 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityEvent.*
 import moe.dic1911.autodnd.data.Storage
+import rikka.shizuku.Shizuku
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 
 class DNDAccessibilityService : AccessibilityService() {
@@ -63,8 +66,16 @@ class DNDAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         val notiMan = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        if (event != null) {
-            val newCurApp = event.packageName?.toString() ?: return // TODO: NPE?
+        var newCurApp = ""
+        if (Storage.shizukuMode) {
+            val proc = Shizuku.newProcess(arrayOf("sh", "-c", "dumpsys activity | grep mFocusedApp | sed 's/.*\\ u.\\ //;s/\\/.*//'"), null, "/")
+            val _output = BufferedReader(InputStreamReader(proc.inputStream))
+            val fullOutput = _output.readLines()
+            if (fullOutput.size > 0) newCurApp = fullOutput[0]
+            Log.d("030_app_shizuku", newCurApp)
+        }
+        if (newCurApp.isEmpty() && event != null) {
+            newCurApp = event.packageName?.toString() ?: return // TODO: NPE?
             Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, current app = ${event.packageName?.toString()}")
             if (blacklist.contains(newCurApp)) { //|| (((event.eventType and launcherBump) != 0) && event.packageName.contains("launcher"))) {
                 Log.d("030_dnd", "ignored")
@@ -72,22 +83,22 @@ class DNDAccessibilityService : AccessibilityService() {
             }
 //            if (event.eventType and eventTypes == 0)
 //                return
-            if (newCurApp != curApp) {
-                curApp = newCurApp
-                Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, current app = $curApp")
-                appList = Storage.prefs_str.value!!
+            Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, current app = $curApp")
+        }
+        if (newCurApp != curApp) {
+            curApp = newCurApp
+            appList = Storage.prefs_str.value!!
 
-                if (appList.contains(curApp)) {
-                    bakNotiState = notiMan.currentInterruptionFilter
-                    if (bakNotiState == 1)
-                        notiMan.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALARMS)
-                    state = 1
-                } else if (state == 1) {
-                    state = 0
-                    if (bakNotiState != notiMan.currentInterruptionFilter) {
-                        notiMan.setInterruptionFilter(bakNotiState)
-                        am.ringerMode = bakRingMode
-                    }
+            if (appList.contains(curApp)) {
+                bakNotiState = notiMan.currentInterruptionFilter
+                if (bakNotiState == 1)
+                    notiMan.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALARMS)
+                state = 1
+            } else if (state == 1) {
+                state = 0
+                if (bakNotiState != notiMan.currentInterruptionFilter) {
+                    notiMan.setInterruptionFilter(bakNotiState)
+                    am.ringerMode = bakRingMode
                 }
             }
         }

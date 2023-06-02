@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.drawable.Icon
 import android.os.Bundle
@@ -13,15 +13,14 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import moe.dic1911.autodnd.data.AppEntry
 import moe.dic1911.autodnd.data.Storage
-import moe.dic1911.autodnd.ui.main.MainFragment
 import moe.dic1911.autodnd.ui.main.SectionsPagerAdapter
+import rikka.shizuku.Shizuku
+import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,9 +35,18 @@ class MainActivity : AppCompatActivity() {
         R.string.tab_3_text
     )
 
+    private val REQUEST_PERMISSION_RESULT_LISTENER =
+        OnRequestPermissionResultListener { requestCode: Int, grantResult: Int ->
+            Storage.onShizukuRequestPermissionsResult(
+                requestCode,
+                grantResult
+            )
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Shizuku.addRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER)
 
         Storage.initDNDList(this)
 
@@ -83,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         Storage.setupStatus = Storage.setupStatus
-
+        checkPermission(1)
         if (Storage.setupStatus == 0) {
             fab.backgroundTintList = ColorStateList.valueOf(getColor(R.color.colorAccent))
             fab.setImageIcon(Icon.createWithResource(baseContext, R.drawable.ic_baseline_refresh_32))
@@ -113,5 +121,29 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Shizuku.removeRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER)
+    }
+
+    private fun checkPermission(code: Int): Boolean {
+        if (Shizuku.isPreV11()) {
+            // Pre-v11 is unsupported
+            return false
+        }
+        val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+        Storage.setShizuku(granted)
+        return if (granted) {
+            true
+        } else if (Shizuku.shouldShowRequestPermissionRationale()) {
+            // Users choose "Deny and don't ask again"
+            false
+        } else {
+            // Request the permission
+            Shizuku.requestPermission(code)
+            false
+        }
     }
 }
