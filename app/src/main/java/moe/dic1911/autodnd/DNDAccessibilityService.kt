@@ -67,25 +67,25 @@ class DNDAccessibilityService : AccessibilityService() {
         val notiMan = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         var newCurApp = ""
-        if (Storage.shizukuMode) {
-            val proc = Shizuku.newProcess(arrayOf("sh", "-c", "dumpsys activity | grep mFocusedApp | sed 's/.*\\ u.\\ //;s/\\/.*//'"), null, "/")
-            val _output = BufferedReader(InputStreamReader(proc.inputStream))
-            val fullOutput = _output.readLines()
-            if (fullOutput.size > 0) newCurApp = fullOutput[0]
-            Log.d("030_app_shizuku", newCurApp)
-        }
-        if (newCurApp.isEmpty() && event != null) {
+        if (event == null) return
+        if (newCurApp.isEmpty()) {
             newCurApp = event.packageName?.toString() ?: return // TODO: NPE?
-            Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, current app = ${event.packageName?.toString()}")
             if (blacklist.contains(newCurApp)) { //|| (((event.eventType and launcherBump) != 0) && event.packageName.contains("launcher"))) {
                 Log.d("030_dnd", "ignored")
                 return
             }
 //            if (event.eventType and eventTypes == 0)
 //                return
-            Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, current app = $curApp")
         }
         if (newCurApp != curApp) {
+            Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, prev app = $curApp, current app = $newCurApp")
+
+            // workaround false positive with Shizuku
+            if ((event.eventType == TYPE_WINDOW_STATE_CHANGED || event.eventType == TYPE_VIEW_FOCUSED) && Storage.shizukuMode) {
+                newCurApp = checkCurrentAppWithShizuku()
+                if (newCurApp == curApp) return
+            }
+
             curApp = newCurApp
             appList = Storage.prefs_str.value!!
 
@@ -102,5 +102,15 @@ class DNDAccessibilityService : AccessibilityService() {
                 }
             }
         }
+    }
+
+    fun checkCurrentAppWithShizuku(): String {
+        var ret = ""
+        val proc = Shizuku.newProcess(arrayOf("sh", "-c", "dumpsys activity | grep mFocusedApp | sed 's/.*\\ u.\\ //;s/\\/.*//'"), null, "/")
+        val _output = BufferedReader(InputStreamReader(proc.inputStream))
+        val fullOutput = _output.readLines()
+        if (fullOutput.size > 0) ret = fullOutput[0]
+        Log.d("030_app_shizuku", ret)
+        return ret
     }
 }
