@@ -106,10 +106,11 @@ class DNDAccessibilityService : AccessibilityService() {
 
     fun checkCurrentAppWithShizuku(): String {
         var ret = ""
-        val proc = Shizuku.newProcess(arrayOf("sh", "-c", "dumpsys activity | grep mFocusedApp | sed 's/.*\\ u.\\ //;s/\\/.*//'"), null, "/")
+        val proc = Shizuku.newProcess(arrayOf("sh", "-c", "dumpsys activity activities | grep mFocusedApp | sed 's/.*\\ u.\\ //;s/\\/.*//'"), null, "/")
         val _output = BufferedReader(InputStreamReader(proc.inputStream))
         val fullOutput = _output.readLines()
-        if (fullOutput.size > 0) ret = fullOutput[0]
+        // workaround: somehow there might not be just one app with mFocusedApp value, so far the first one seem to be the wrong one
+        if (fullOutput.size > 0) ret = fullOutput.last()
         Log.d("030_app_shizuku", ret)
         return ret
     }
