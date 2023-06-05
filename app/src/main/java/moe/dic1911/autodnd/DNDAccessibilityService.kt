@@ -24,7 +24,6 @@ class DNDAccessibilityService : AccessibilityService() {
     private val blacklist: ArrayList<String> = ArrayList()
     private val info = AccessibilityServiceInfo()
     private val eventTypes = TYPE_VIEW_FOCUSED or TYPE_VIEW_CLICKED or TYPE_WINDOW_STATE_CHANGED
-//    private val launcherBump = TYPE_WINDOW_CONTENT_CHANGED or TYPE_VIEW_FOCUSED
     private var curApp = ""
     private var state = 0
     private var bakNotiState = NotificationManager.INTERRUPTION_FILTER_ALL
@@ -35,7 +34,7 @@ class DNDAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
-        info.eventTypes = eventTypes// or launcherBump
+        info.eventTypes = eventTypes
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
         info.notificationTimeout = 100
         this.serviceInfo = info
@@ -70,12 +69,10 @@ class DNDAccessibilityService : AccessibilityService() {
         if (event == null) return
         if (newCurApp.isEmpty()) {
             newCurApp = event.packageName?.toString() ?: return // TODO: NPE?
-            if (blacklist.contains(newCurApp)) { //|| (((event.eventType and launcherBump) != 0) && event.packageName.contains("launcher"))) {
+            if (blacklist.contains(newCurApp)) {
                 Log.d("030_dnd", "ignored")
                 return
             }
-//            if (event.eventType and eventTypes == 0)
-//                return
         }
         if (newCurApp != curApp) {
             Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, prev app = $curApp, current app = $newCurApp")
