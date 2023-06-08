@@ -8,15 +8,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
-import android.os.Build
-import android.os.Build.VERSION.SDK_INT
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityEvent.*
+import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_CLICKED
+import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
+import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+import android.view.accessibility.AccessibilityEvent.eventTypeToString
 import moe.dic1911.autodnd.data.Storage
 import rikka.shizuku.Shizuku
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.util.Calendar
 
 
 class DNDAccessibilityService : AccessibilityService() {
@@ -78,9 +80,13 @@ class DNDAccessibilityService : AccessibilityService() {
             Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, prev app = $curApp, current app = $newCurApp")
 
             // workaround false positive with Shizuku
-            if ((event.eventType == TYPE_WINDOW_STATE_CHANGED || event.eventType == TYPE_VIEW_FOCUSED) && Storage.shizukuMode) {
-                newCurApp = checkCurrentAppWithShizuku()
-                if (newCurApp == curApp) return
+            if (Storage.shizukuMode && newCurApp.contains(Storage.launcher) && (event.eventType == TYPE_WINDOW_STATE_CHANGED || event.eventType == TYPE_VIEW_FOCUSED)) {
+                val now = (Calendar.getInstance().timeInMillis)
+                if ((now - lastEvtTime) > 500) {
+                    newCurApp = checkCurrentAppWithShizuku()
+                    lastEvtTime = now
+                    if (newCurApp == curApp) return
+                }
             }
 
             curApp = newCurApp

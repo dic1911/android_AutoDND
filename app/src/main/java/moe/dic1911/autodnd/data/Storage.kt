@@ -2,6 +2,7 @@ package moe.dic1911.autodnd.data
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -9,17 +10,26 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import rikka.shizuku.Shizuku
 
+
 object Storage {
 
     private val appListStorage = AppListStorage()
     var initialized: MutableLiveData<Boolean> = MutableLiveData(false)
     var setupStatus = 0
     var shizukuMode = false
+    var launcher = "com.android.launcher"
     private lateinit var pm: PackageManager
     private lateinit var prefs: SharedPreferences
     lateinit var prefs_str: MutableLiveData<ArrayList<String>>
 
     fun initForService(context: Context) {
+        // check for launcher
+        val pm: PackageManager = context.packageManager
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        launcher = pm.resolveActivity(intent, PackageManager.MATCH_ALL)!!.activityInfo.packageName
+        Log.d("030_launcher", "launcher: " + launcher)
+
         if (appListStorage.applist_dnd.size != 0) return
         prefs = context.getSharedPreferences("main", MODE_PRIVATE)
         val tmp = prefs.getString("dnd_enabled_apps", "")
