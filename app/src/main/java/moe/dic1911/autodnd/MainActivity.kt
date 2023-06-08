@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         Storage.setupStatus = Storage.setupStatus
-        checkPermission(1)
+        Storage.checkPermission(1)
         if (Storage.setupStatus == 0) {
             fab.backgroundTintList = ColorStateList.valueOf(getColor(R.color.colorAccent))
             fab.setImageIcon(Icon.createWithResource(baseContext, R.drawable.ic_baseline_refresh_32))
@@ -128,22 +128,5 @@ class MainActivity : AppCompatActivity() {
         Shizuku.removeRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER)
     }
 
-    private fun checkPermission(code: Int): Boolean {
-        if (Shizuku.isPreV11()) {
-            // Pre-v11 is unsupported
-            return false
-        }
-        val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-        Storage.setShizuku(granted)
-        return if (granted) {
-            true
-        } else if (Shizuku.shouldShowRequestPermissionRationale()) {
-            // Users choose "Deny and don't ask again"
-            false
-        } else {
-            // Request the permission
-            Shizuku.requestPermission(code)
-            false
-        }
-    }
+
 }

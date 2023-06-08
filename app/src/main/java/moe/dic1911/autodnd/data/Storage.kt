@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import rikka.shizuku.Shizuku
 
 object Storage {
 
@@ -86,6 +87,21 @@ object Storage {
     fun setShizuku(v: Boolean) {
         prefs.edit().putBoolean("shizuku", v).apply()
         shizukuMode = v
+    }
+
+    fun checkPermission(code: Int): Boolean {
+        if (Shizuku.isPreV11()) {
+            // Pre-v11 is unsupported
+            return false
+        }
+        val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+        return if (!granted && !prefs.contains("shizuku")) {
+            Shizuku.requestPermission(code)
+            false
+        } else {
+            setShizuku(granted)
+            granted
+        }
     }
 
     fun clearList() {
