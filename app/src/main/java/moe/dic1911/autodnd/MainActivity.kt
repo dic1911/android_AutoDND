@@ -29,6 +29,7 @@ import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
 class MainActivity : AppCompatActivity() {
     private lateinit var notiMan: NotificationManager
     private lateinit var fab: FloatingActionButton
+    private var restartOnResume = false
 
     private val TAG = "030"
 
@@ -72,6 +73,14 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume()")
+
+        if (restartOnResume) {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+            finish()
+        }
+
         // check if necessary permission granted / service enabled
         Storage.setupStatus = 0
         if (!notiMan.isNotificationPolicyAccessGranted) {
@@ -138,6 +147,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
             }
             2 -> {
+                restartOnResume = true
                 Toast.makeText(applicationContext, R.string.accessbility_svc_tip, Toast.LENGTH_LONG).show()
                 val settingsIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                 if (settingsIntent !is Activity) {

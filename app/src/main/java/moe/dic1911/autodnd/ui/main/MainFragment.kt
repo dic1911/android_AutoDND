@@ -72,7 +72,6 @@ class MainFragment(val index: Int) : Fragment() {
         }
         Storage.prefs_str.observe(viewLifecycleOwner) {
             if (pageViewModel.getIndex() == 0) {
-                Log.d("030-list", it.size.toString())
                 (recyclerView.adapter as AppListAdapter?)?.appList = Storage.getAppList(0)!!
                 (recyclerView.adapter as AppListAdapter?)?.notifyDataSetChanged()
             }
