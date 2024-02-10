@@ -1,8 +1,10 @@
 package moe.dic1911.autodnd
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -11,6 +13,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
@@ -98,28 +101,23 @@ class MainActivity : AppCompatActivity() {
         } else {
             fab.backgroundTintList = ColorStateList.valueOf(getColor(R.color.design_default_color_error))
             fab.setImageIcon(Icon.createWithResource(baseContext, android.R.drawable.stat_sys_warning))
+
+            if (Storage.setupStatus == 2 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                val dlgBuilder = AlertDialog.Builder(this)
+                val noteTxt = TextView(this)
+                noteTxt.setText(R.string.note_content)
+                noteTxt.setPadding(30, 40, 30, 0)
+                dlgBuilder.setTitle(R.string.note)
+                dlgBuilder.setView(noteTxt)
+                dlgBuilder.setPositiveButton("OK") { dialog, which ->
+                    runSetupStep()
+                }
+                dlgBuilder.create().show()
+            }
         }
 
         fab.setOnClickListener(fun(it: View) {
-            when (Storage.setupStatus) {
-                0 -> {
-                    Toast.makeText(this, R.string.refreshing, Toast.LENGTH_LONG).show()
-                    Storage.initialized.postValue(false)
-                    Storage.initDNDList(this)
-                }
-                1,3 -> {
-                    Toast.makeText(applicationContext, R.string.notification_policy_tip, Toast.LENGTH_LONG).show()
-                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
-                }
-                2 -> {
-                    Toast.makeText(applicationContext, R.string.accessbility_svc_tip, Toast.LENGTH_LONG).show()
-                    val settingsIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                    if (settingsIntent !is Activity) {
-                        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    startActivity(settingsIntent)
-                }
-            }
+            runSetupStep()
         })
     }
 
@@ -128,5 +126,26 @@ class MainActivity : AppCompatActivity() {
         Shizuku.removeRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER)
     }
 
+    private fun runSetupStep() {
+        when (Storage.setupStatus) {
+            0 -> {
+                Toast.makeText(this, R.string.refreshing, Toast.LENGTH_LONG).show()
+                Storage.initialized.postValue(false)
+                Storage.initDNDList(this)
+            }
+            1,3 -> {
+                Toast.makeText(applicationContext, R.string.notification_policy_tip, Toast.LENGTH_LONG).show()
+                startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+            }
+            2 -> {
+                Toast.makeText(applicationContext, R.string.accessbility_svc_tip, Toast.LENGTH_LONG).show()
+                val settingsIntent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                if (settingsIntent !is Activity) {
+                    settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(settingsIntent)
+            }
+        }
+    }
 
 }

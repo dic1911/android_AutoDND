@@ -17,4 +17,6 @@
     <string name="ex_app_name">Application Name</string>
     <string name="ex_pkg_name">com.example.app</string>
     <string name="refreshing">Refreshing…</string>
+    <string name="note">Note</string>
+    <string name="note_content">If you\'re on newer Android versions, you might need to go to App Info page and click on \"Allow restricted settings\" in menu to allow the accessibility service of this app to run.</string>
 </resources>
