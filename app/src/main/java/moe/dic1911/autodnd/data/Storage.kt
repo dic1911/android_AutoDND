@@ -100,17 +100,22 @@ object Storage {
     }
 
     fun checkPermission(code: Int): Boolean {
-        if (Shizuku.isPreV11()) {
-            // Pre-v11 is unsupported
+        try {
+            if (Shizuku.isPreV11()) {
+                // Pre-v11 is unsupported
+                return false
+            }
+            val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            return if (!granted && !prefs.contains("shizuku")) {
+                Shizuku.requestPermission(code)
+                false
+            } else {
+                setShizuku(granted)
+                granted
+            }
+        } catch (e: Exception) {
+            Log.e("030-shizuku", "check failed, prob not installed", e)
             return false
-        }
-        val granted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-        return if (!granted && !prefs.contains("shizuku")) {
-            Shizuku.requestPermission(code)
-            false
-        } else {
-            setShizuku(granted)
-            granted
         }
     }
 
