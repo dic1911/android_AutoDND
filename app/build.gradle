@@ -2,8 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    compileSdk 33
 
     defaultConfig {
         applicationId "moe.dic1911.autodnd"
