@@ -8,8 +8,8 @@ android {
         applicationId "moe.dic1911.autodnd"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 5
-        versionName "3.0"
+        versionCode 6
+        versionName "3.1"
     }
 
     buildTypes {
