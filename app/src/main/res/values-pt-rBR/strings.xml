@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">AutoDND</string>
+    <string name="tab_1_text">Apps adicionados</string>
+    <string name="tab_1_tip">Esta guia exibe apps adicionados para alternância automática do Não perturbe</string>
+    <string name="tab_2_text">Todos os apps</string>
+    <string name="tab_2_tip">Toque no app listado para ativar a alternância automática do Não perturbe</string>
+    <string name="tab_3_text">Apps do sistema</string>
+    <string name="setup_tip">Por favor, toque no botão flutuante para finalizar a configuração.</string>
+    <string name="added">Adicionado</string>
+    <string name="removed">Removido</string>
+    <string name="accessibility_service_label">Alternar Não perturbe automaticamente</string>
+    <string name="accessibility_service_desc">Ative o Não perturbe automaticamente sempre que usar apps específicos e desligue-o depois.</string>
+    <string name="notification_policy_tip">Por favor, permita que este app acesse/modifique a política de notificação.</string>
+    <string name="accessbility_svc_tip">Por favor, ative o serviço de acessibilidade para que este app funcione.</string>
+    <string name="desc_fab">Botão para adquirir permissão</string>
+    <string name="desc_img">IMG</string>
+    <string name="ex_app_name">Nome do app</string>
+    <string name="ex_pkg_name">com.example.app</string>
+    <string name="refreshing">Atualizando…</string>
+    <string name="note">Observação</string>
+    <string name="note_content">Se você estiver em versões mais recentes do Android, talvez seja necessário acessar a página de informações do app e clicar em "Permitir configurações restritas" no menu para permitir a execução do serviço de acessibilidade deste app.</string>
+</resources>
