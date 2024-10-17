@@ -83,8 +83,12 @@ class DNDAccessibilityService : AccessibilityService() {
             if (Storage.shizukuMode && newCurApp.contains(Storage.launcher) && (event.eventType == TYPE_WINDOW_STATE_CHANGED || event.eventType == TYPE_VIEW_FOCUSED)) {
                 val now = (Calendar.getInstance().timeInMillis)
                 if ((now - lastEvtTime) > 500) {
-                    newCurApp = checkCurrentAppWithShizuku()
-                    lastEvtTime = now
+                    try {
+                        newCurApp = checkCurrentAppWithShizuku()
+                        lastEvtTime = now
+                    } catch (ex: Exception) {
+                        Log.e("030-shizuku", "probably not ready?", ex)
+                    }
                     if (newCurApp == curApp) return
                 }
             }
