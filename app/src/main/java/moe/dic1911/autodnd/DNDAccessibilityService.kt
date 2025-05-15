@@ -31,6 +31,8 @@ class DNDAccessibilityService : AccessibilityService() {
     private var bakNotiState = NotificationManager.INTERRUPTION_FILTER_ALL
     private var bakRingMode = AudioManager.RINGER_MODE_VIBRATE
     private var lastEvtTime: Long = 0
+    private var dndByUs = false
+    private var stateBeforeScreenOff: Int? = NotificationManager.INTERRUPTION_FILTER_UNKNOWN
 
     override fun onInterrupt() {}
 
@@ -62,6 +64,34 @@ class DNDAccessibilityService : AccessibilityService() {
         }
         val filter_ringer = IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION)
         registerReceiver(recv_ringer, filter_ringer)
+
+        try {
+            val filterScreenOnOff = IntentFilter(Intent.ACTION_SCREEN_ON)
+            filterScreenOnOff.addAction(Intent.ACTION_SCREEN_OFF)
+            val screenReceiver = ScreenReceiver()
+            registerReceiver(screenReceiver, filterScreenOnOff)
+            screenReceiver.addCallback(1) { screenOn ->
+                val notiMan = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                if (screenOn && stateBeforeScreenOff != NotificationManager.INTERRUPTION_FILTER_UNKNOWN) {
+                    stateBeforeScreenOff?.let {
+                        notiMan.setInterruptionFilter(it)
+                        Log.d("030-scr", "restored saved state ($stateBeforeScreenOff)")
+                    }
+                }
+
+                if (!screenOn) {
+                    // backup current state after off + turn off dnd if turned on by us
+                    stateBeforeScreenOff = notiMan.currentInterruptionFilter
+                    Log.d("030-scr", "saved state ($stateBeforeScreenOff)")
+                    if (state == 1) {
+                        notiMan.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
+                        Log.d("030-scr", "disabled DND")
+                    }
+                }
+            }
+        } catch (ex: Exception) {
+            Log.e("030-scr", "failed to register receiver for screen event", ex)
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
