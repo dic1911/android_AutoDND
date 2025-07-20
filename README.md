@@ -1,7 +1,11 @@
+[<img src="https://shields.rbtlog.dev/simple/moe.dic1911.autodnd" alt="RB shield">](https://shields.rbtlog.dev/moe.dic1911.autodnd)
+
 # AutoDND
 
 [<img src="https://f-droid.org/badge/get-it-on-en.png" alt="Get it from F-Droid"
       height="100"><br/>](https://f-droid.org/packages/moe.dic1911.autodnd)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it from IzzyOnDroid"
+      height="100"><br/>](https://apt.izzysoft.de/packages/moe.dic1911.autodnd)
 
 Just a simple tool to turn on/off DND(Do Not Disturb) automatically when using specified apps.
 
@@ -20,4 +24,3 @@ Usage: Grant necessary permission (Just tap on the floating button), and add you
 ## To-dos:
 
 1. Better mechanism to make sure DND turns on/off only on expected conditions
- 
