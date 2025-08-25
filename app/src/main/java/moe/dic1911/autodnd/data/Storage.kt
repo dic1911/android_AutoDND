@@ -8,6 +8,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import moe.dic1911.autodnd.logging.DNDLogger
 import rikka.shizuku.Shizuku
 
 
@@ -28,7 +29,7 @@ object Storage {
         val intent = Intent(Intent.ACTION_MAIN)
         intent.addCategory(Intent.CATEGORY_HOME)
         launcher = pm.resolveActivity(intent, PackageManager.MATCH_ALL)!!.activityInfo.packageName
-        Log.d("030_launcher", "launcher: " + launcher)
+        DNDLogger.logSystemEvent("Launcher detection", "Detected launcher: $launcher")
 
         if (appListStorage.applist_dnd.size != 0) return
         prefs = context.getSharedPreferences("main", MODE_PRIVATE)
@@ -36,7 +37,7 @@ object Storage {
         prefs_str = MutableLiveData()
         prefs_str.value = ArrayList(tmp!!.split(","))
         shizukuMode = prefs.getBoolean("shizuku", false)
-        Log.d("030_dnd_shizuku", shizukuMode.toString())
+        DNDLogger.logPreferencesOperation("Load", "shizuku", shizukuMode.toString())
     }
 
     fun initDNDList(context: Context) {
@@ -56,12 +57,12 @@ object Storage {
             prefs_str_tmp.add("klb.android.lovelive_en")
             prefs_str_tmp.add("moe.low.arc")
             val tmp = prefs_str_tmp.joinToString(separator = ",")
-            Log.d("030_prefs", tmp)
+            DNDLogger.logPreferencesOperation("Initialize", "dnd_enabled_apps", tmp)
             prefs.edit().putString("dnd_enabled_apps", tmp).apply()
         } else {
             val tmp = prefs.getString("dnd_enabled_apps", "")
             prefs_str_tmp = ArrayList(tmp!!.split(","))
-            Log.d("030_prefs_load", tmp)
+            DNDLogger.logPreferencesOperation("Load", "dnd_enabled_apps", tmp)
         }
         prefs_str.value = prefs_str_tmp
 
@@ -69,7 +70,7 @@ object Storage {
             clearList()
 
         val pkgs = pm.getInstalledPackages(0)
-        Log.d("030_pkg", "pkgs.size=${pkgs.size}")
+        DNDLogger.logSystemEvent("Package scan", "Found ${pkgs.size} installed packages")
         for (i in pkgs.indices) {
             val p = pkgs[i]
             val e = AppEntry()
@@ -114,7 +115,7 @@ object Storage {
                 granted
             }
         } catch (e: Exception) {
-            Log.e("030-shizuku", "check failed, prob not installed", e)
+            DNDLogger.logShizukuOperation("Permission check", error = e)
             return false
         }
     }
@@ -127,7 +128,7 @@ object Storage {
     fun appendToList(mode: Int, e: AppEntry) {
         when (mode) {
             0 -> {
-                Log.d("030_append", e.app_pkgname!!)
+                DNDLogger.logAppListOperation("Add to DND list", e.app_pkgname!!, appListStorage.applist_dnd.size + 1)
                 appListStorage.applist_dnd.add(e)
                 val tmp = prefs_str.value
                 tmp!!.add(e.app_pkgname!!)
@@ -174,7 +175,7 @@ object Storage {
         val pos = isAutoDNDApp(pkg)
         if (pos != -1) {
             val tmp = ArrayList<String>()
-            Log.d("030_remove", pkg)
+            DNDLogger.logAppListOperation("Remove from DND list", pkg, appListStorage.applist_dnd.size - 1)
             appListStorage.applist_dnd.removeAt(pos)
             for (e in appListStorage.applist_dnd) tmp.add(e.app_pkgname!!)
             prefs.edit().putString("dnd_enabled_apps", tmp.joinToString(",")).apply()

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import moe.dic1911.autodnd.R
 import moe.dic1911.autodnd.data.AppEntry
 import moe.dic1911.autodnd.data.Storage
+import moe.dic1911.autodnd.logging.DNDLogger
 
 class AppEntryHolder (itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
     private val ic_app: ImageView = itemView.findViewById(R.id.app_ic)
@@ -25,8 +26,11 @@ class AppEntryHolder (itemView: View) : RecyclerView.ViewHolder(itemView), View.
 
     override fun onClick(v: View?) {
         val pkg = txt_pkgname.text.toString()
-        Log.d("030-clicked", pkg)
-        if (Storage.setAutoDNDApp(pkg))
+        val added = Storage.setAutoDNDApp(pkg)
+        val action = if (added) "Added to" else "Removed from"
+        DNDLogger.logUIOperation("App selection", "$action DND list: $pkg")
+
+        if (added)
             Toast.makeText(v!!.context, R.string.added, LENGTH_SHORT).show()
         else
             Toast.makeText(v!!.context, R.string.removed, LENGTH_SHORT).show()

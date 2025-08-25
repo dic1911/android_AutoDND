@@ -16,6 +16,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import moe.dic1911.autodnd.logging.DNDLogger
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
@@ -54,8 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         Storage.initDNDList(this)
 
-        Log.d("030_pkg", "applist.size=${Storage.getAppList(0)?.size}")
-        Log.d("030_pkg", "applist_dnd.size=${Storage.getAppList(1)?.size}")
+        DNDLogger.logUIOperation("App lists initialized", "DND apps: ${Storage.getAppList(0)?.size}, All apps: ${Storage.getAppList(1)?.size}")
 
         val sectionsPagerAdapter = SectionsPagerAdapter(this)
         val viewPager: ViewPager2 = findViewById(R.id.view_pager)
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        Log.d(TAG, "onResume()")
+        DNDLogger.logUIOperation("MainActivity resumed")
 
         if (restartOnResume) {
             val intent = Intent(this, MainActivity::class.java)
@@ -85,19 +85,19 @@ class MainActivity : AppCompatActivity() {
         Storage.setupStatus = 0
         if (!notiMan.isNotificationPolicyAccessGranted) {
             Storage.setupStatus = 1
-            Log.d(TAG, "notification policy access not granted")
+            DNDLogger.logPermissionCheck("Notification Policy Access", false)
             Toast.makeText(applicationContext, R.string.notification_policy_tip, Toast.LENGTH_LONG).show()
         }
         if (Settings.Secure.getInt(this.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED) == 1) {
             val svcs = Settings.Secure.getString(this.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
-            Log.d(TAG, svcs)
+            DNDLogger.logDebug("Setup", "Enabled accessibility services: $svcs")
             if (svcs.contains("moe.dic1911.autodnd.DNDAccessibilityService")) {
-                Log.d(TAG, "Auto DND enabled")
+                DNDLogger.logPermissionCheck("Accessibility Service", true)
             } else {
                 Storage.setupStatus = (Storage.setupStatus or 2)
             }
         } else {
-            Log.d(TAG, "No enabled services")
+            DNDLogger.logPermissionCheck("Accessibility Service", false)
             Toast.makeText(applicationContext, R.string.accessbility_svc_tip, Toast.LENGTH_LONG).show()
             Storage.setupStatus = (Storage.setupStatus or 2)
         }

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.util.Consumer
+import moe.dic1911.autodnd.logging.DNDLogger
 
 class ScreenReceiver : BroadcastReceiver() {
     val callbacks = HashMap<Int, Consumer<Boolean>>()
@@ -20,7 +21,7 @@ class ScreenReceiver : BroadcastReceiver() {
             try {
                 e.value.accept(isScreenOn)
             } catch (ex: Exception) {
-                Log.e("030-scr-callback", "on exec ${e.key}", ex)
+                DNDLogger.logError("Screen", "Callback execution failed for ${e.key}", ex)
             }
         }
     }

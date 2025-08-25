@@ -15,6 +15,7 @@ import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityEvent.eventTypeToString
 import moe.dic1911.autodnd.data.Storage
+import moe.dic1911.autodnd.logging.DNDLogger
 import rikka.shizuku.Shizuku
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -54,11 +55,16 @@ class DNDAccessibilityService : AccessibilityService() {
                 val notiMan = (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
                 val dnd = notiMan.currentInterruptionFilter
                 if (state == 1 || dnd != 1) {
-                    Log.d("030_recv_ring", "Either we're running apps in list or DND is on/unknown")
+                    DNDLogger.logSystemEvent("Ringer mode change ignored", "DND app active or DND already on")
                     return
                 }
                 val tmp_ring = (getSystemService(Context.AUDIO_SERVICE) as AudioManager).ringerMode
-                Log.d("030_recv_ring", "noti/dnd: $dnd, ring: $bakRingMode => $tmp_ring")
+                DNDLogger.logDNDStateChange(
+                    DNDLogger.DNDChangeReason.RINGER_MODE_BACKUP,
+                    fromState = bakRingMode,
+                    toState = tmp_ring,
+                    additionalInfo = "DND filter: $dnd"
+                )
                 bakRingMode = tmp_ring
             }
         }
@@ -72,25 +78,39 @@ class DNDAccessibilityService : AccessibilityService() {
             registerReceiver(screenReceiver, filterScreenOnOff)
             screenReceiver.addCallback(1) { screenOn ->
                 val notiMan = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val currentDNDState = notiMan.currentInterruptionFilter
+
                 if (screenOn && stateBeforeScreenOff != NotificationManager.INTERRUPTION_FILTER_UNKNOWN) {
-                    stateBeforeScreenOff?.let {
-                        notiMan.setInterruptionFilter(it)
-                        Log.d("030-scr", "restored saved state ($stateBeforeScreenOff)")
+                    stateBeforeScreenOff?.let { savedState ->
+                        DNDLogger.logDNDStateChange(
+                            DNDLogger.DNDChangeReason.SCREEN_ON_RESTORE,
+                            fromState = currentDNDState,
+                            toState = savedState,
+                            additionalInfo = "Restoring state from before screen off"
+                        )
+                        notiMan.setInterruptionFilter(savedState)
                     }
                 }
 
                 if (!screenOn) {
                     // backup current state after off + turn off dnd if turned on by us
-                    stateBeforeScreenOff = notiMan.currentInterruptionFilter
-                    Log.d("030-scr", "saved state ($stateBeforeScreenOff)")
+                    stateBeforeScreenOff = currentDNDState
+                    DNDLogger.logScreenStateChange(false, currentDNDState, "Saved current DND state")
+
                     if (state == 1) {
+                        DNDLogger.logDNDStateChange(
+                            DNDLogger.DNDChangeReason.SCREEN_OFF_DISABLE,
+                            appPackage = curApp,
+                            fromState = currentDNDState,
+                            toState = NotificationManager.INTERRUPTION_FILTER_ALL,
+                            additionalInfo = "Auto-disabling DND due to screen off"
+                        )
                         notiMan.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL)
-                        Log.d("030-scr", "disabled DND")
                     }
                 }
             }
         } catch (ex: Exception) {
-            Log.e("030-scr", "failed to register receiver for screen event", ex)
+            DNDLogger.logError("Screen", "Failed to register receiver for screen events", ex)
         }
     }
 
@@ -102,12 +122,13 @@ class DNDAccessibilityService : AccessibilityService() {
         if (newCurApp.isEmpty()) {
             newCurApp = event.packageName?.toString() ?: return // TODO: NPE?
             if (blacklist.contains(newCurApp)) {
-                Log.d("030_dnd", "ignored")
+                DNDLogger.logAppIgnored(newCurApp, "App in blacklist")
                 return
             }
         }
         if (newCurApp != curApp) {
-            Log.d("030_ev+app", "${eventTypeToString(event.eventType)}, prev app = $curApp, current app = $newCurApp")
+            DNDLogger.logAppSwitch(curApp, newCurApp, appList.contains(newCurApp))
+            DNDLogger.logDebug("Event", "${eventTypeToString(event.eventType)} - App switch detected")
 
             // workaround false positive with Shizuku
             if (Storage.shizukuMode && newCurApp.contains(Storage.launcher) && (event.eventType == TYPE_WINDOW_STATE_CHANGED || event.eventType == TYPE_VIEW_FOCUSED)) {
@@ -117,7 +138,7 @@ class DNDAccessibilityService : AccessibilityService() {
                         newCurApp = checkCurrentAppWithShizuku()
                         lastEvtTime = now
                     } catch (ex: Exception) {
-                        Log.e("030-shizuku", "probably not ready?", ex)
+                        DNDLogger.logShizukuOperation("Current app check", error = ex)
                     }
                     if (newCurApp == curApp) return
                 }
@@ -127,15 +148,46 @@ class DNDAccessibilityService : AccessibilityService() {
             appList = Storage.prefs_str.value!!
 
             if (appList.contains(curApp)) {
-                bakNotiState = notiMan.currentInterruptionFilter
-                if (bakNotiState == 1)
+                // Entering DND-enabled app
+                val currentState = notiMan.currentInterruptionFilter
+                bakNotiState = currentState
+
+                if (bakNotiState == NotificationManager.INTERRUPTION_FILTER_ALL) {
+                    DNDLogger.logDNDStateChange(
+                        DNDLogger.DNDChangeReason.APP_ENTERED_DND_LIST,
+                        appPackage = curApp,
+                        fromState = currentState,
+                        toState = NotificationManager.INTERRUPTION_FILTER_ALARMS,
+                        additionalInfo = "Enabling DND for app"
+                    )
                     notiMan.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALARMS)
+                } else {
+                    DNDLogger.logDNDAttempt(
+                        DNDLogger.DNDChangeReason.APP_ENTERED_DND_LIST,
+                        appPackage = curApp,
+                        targetState = NotificationManager.INTERRUPTION_FILTER_ALARMS,
+                        success = false,
+                        error = "DND already active (state: $currentState)"
+                    )
+                }
                 state = 1
             } else if (state == 1) {
+                // Exiting DND-enabled app
+                val currentState = notiMan.currentInterruptionFilter
                 state = 0
-                if (bakNotiState != notiMan.currentInterruptionFilter) {
+
+                if (bakNotiState != currentState) {
+                    DNDLogger.logDNDStateChange(
+                        DNDLogger.DNDChangeReason.APP_EXITED_DND_LIST,
+                        appPackage = curApp,
+                        fromState = currentState,
+                        toState = bakNotiState,
+                        additionalInfo = "Restoring previous DND state and ringer mode"
+                    )
                     notiMan.setInterruptionFilter(bakNotiState)
                     am.ringerMode = bakRingMode
+                } else {
+                    DNDLogger.logDebug("DND", "No DND state change needed - states match (current: $currentState, backup: $bakNotiState)")
                 }
             }
         }
@@ -151,7 +203,7 @@ class DNDAccessibilityService : AccessibilityService() {
         val fullOutput = _output.readLines()
         // workaround: somehow there might not be just one app with mFocusedApp value, so far the first one seem to be the wrong one
         if (fullOutput.size > 0) ret = fullOutput.last()
-        Log.d("030_app_shizuku", ret)
+        DNDLogger.logShizukuOperation("Current app detection", "Detected app: $ret (from ${fullOutput.size} results)")
         return ret
     }
 }
